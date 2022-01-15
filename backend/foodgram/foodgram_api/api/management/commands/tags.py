@@ -4,6 +4,10 @@ from recipes.models import Tags
 
 
 class Command(BaseCommand):
+    """
+    Внесение ингредиентов из файла foodgram/data/tags.json
+    в базу данных.
+    """
     help = 'Tags'
 
     def handle(self, *args, **options):

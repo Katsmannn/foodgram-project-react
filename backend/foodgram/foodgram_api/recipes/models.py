@@ -1,7 +1,4 @@
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.fields import CharField
-from django.utils.translation import gettext_lazy as _
 
 from users.models import User
 
@@ -22,6 +19,7 @@ class Tags(models.Model):
     )
 
     class Meta:
+        verbose_name_plural = 'Тэги'
         ordering = ['name']
 
     def __str__(self):
@@ -38,6 +36,7 @@ class Ingredients(models.Model):
     )
 
     class Meta:
+        verbose_name_plural = 'Ингредиенты'
         ordering = ['name']
 
     def __str__(self):
@@ -66,14 +65,14 @@ class Recipes(models.Model):
     tags = models.ManyToManyField(
         Tags
     )
-    cooking_time = models.PositiveIntegerField(
-    )
+    cooking_time = models.PositiveIntegerField()
     pub_time = models.DateTimeField(
         auto_now_add=True,
         editable=False,
     )
 
     class Meta:
+        verbose_name_plural = 'Рецепты'
         ordering = ['-pub_time']
 
     def __str__(self):
@@ -93,11 +92,27 @@ class RecipesIngredients(models.Model):
 
 class Cart(models.Model):
 
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE, related_name='cart_recipe')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_user')
+    recipe = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        related_name='cart_recipe'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart_user'
+    )
 
 
 class Favorite(models.Model):
 
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE, related_name='favorite_recipe')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_user')
+    recipe = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        related_name='favorite_recipe'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite_user'
+    )

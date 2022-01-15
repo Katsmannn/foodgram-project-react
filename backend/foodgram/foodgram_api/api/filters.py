@@ -1,14 +1,16 @@
 from django_filters import rest_framework as filt
 
-from recipes.models import *
-from users.models import *
+from recipes.models import Ingredients, Recipes
 
 
 class RecipeFilter(filt.FilterSet):
+    """
+    Фильтр для рецептов.
+    """
     author = filt.NumberFilter(
         field_name='author',
     )
-    tags = filt.CharFilter(
+    tags = filt.AllValuesMultipleFilter(
         field_name='tags__slug',
         lookup_expr='istartswith',
     )
@@ -39,6 +41,9 @@ class RecipeFilter(filt.FilterSet):
 
 
 class IngredientsFilter(filt.FilterSet):
+    """
+    Фильтр для ингредиентов.
+    """
     name = filt.CharFilter(
         field_name='name',
         lookup_expr='istartswith',

@@ -1,10 +1,31 @@
-from rest_framework import permissions
-from rest_framework.permissions import SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class CurrentUserOrAdminOrReadOnly(permissions.IsAuthenticated):
+class IsAdminOrReadOnly(BasePermission):
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and (request.user.is_staff or request.user.is_superuser)
+            or request.method in SAFE_METHODS
+        )
+
     def has_object_permission(self, request, view, obj):
-        user = request.user
-        if type(obj) == type(user) and obj == user:
-            return True
-        return request.method in SAFE_METHODS or user.is_staff
+        return (
+            request.user.is_authenticated
+            and (request.user.is_staff or request.user.is_superuser)
+            or request.method in SAFE_METHODS
+        )
+
+
+class IsAuthorOrAdminOrReadOnly(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.user.is_authenticated
+            and (
+                request.user.is_staff
+                or request.user.is_superuser
+                or request.user == obj.author)
+            or request.method in SAFE_METHODS
+        )

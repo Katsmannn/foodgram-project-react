@@ -1,7 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.fields import CharField
 from django.utils.translation import gettext_lazy as _
 
 
@@ -22,8 +20,20 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['last_name', 'first_name', 'email']
 
+    class Meta:
+        verbose_name_plural = 'Пользователи'
+        ordering = ['username']
+
 
 class Subscriptions(models.Model):
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipe_author')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriber')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipe_author'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriber'
+    )
