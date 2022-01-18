@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import Recipes, Favorite, Tags, Ingredients
+from .models import Favorite, Ingredient, Recipe, Tag
 
 
-@admin.register(Recipes)
+@admin.register(Recipe)
 class RecipesAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'favorited')
     search_fields = ('name',)
@@ -13,11 +13,11 @@ class RecipesAdmin(admin.ModelAdmin):
         return Favorite.objects.filter(recipe=obj).count()
 
 
-@admin.register(Ingredients)
+@admin.register(Ingredient)
 class IngredientsAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Tags)
+@admin.register(Tag)
 class TagsAdmin(admin.ModelAdmin):
     pass

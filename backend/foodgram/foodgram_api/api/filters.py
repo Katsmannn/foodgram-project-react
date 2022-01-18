@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filt
 
-from recipes.models import Ingredients, Recipes
+from recipes.models import Ingredient, Recipe
 
 
 class RecipeFilter(filt.FilterSet):
@@ -10,7 +10,7 @@ class RecipeFilter(filt.FilterSet):
     author = filt.NumberFilter(
         field_name='author',
     )
-    tags = filt.AllValuesMultipleFilter(
+    tags = filt.CharFilter(
         field_name='tags__slug',
         lookup_expr='istartswith',
     )
@@ -24,7 +24,7 @@ class RecipeFilter(filt.FilterSet):
     )
 
     class Meta:
-        model = Recipes
+        model = Recipe
         fields = ('author', 'tags')
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
@@ -50,5 +50,5 @@ class IngredientsFilter(filt.FilterSet):
     )
 
     class Meta:
-        model = Ingredients
+        model = Ingredient
         fields = ('name',)

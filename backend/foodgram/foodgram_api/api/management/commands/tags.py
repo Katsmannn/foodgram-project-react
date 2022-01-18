@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+
 import json
-from recipes.models import Tags
+
+from recipes.models import Tag
 
 
 class Command(BaseCommand):
@@ -14,8 +16,8 @@ class Command(BaseCommand):
         file = open('../data/tags.json')
         data = json.load(file)
         for elem in data:
-            Tags.objects.create(
-                name=elem['name'].encode('cp1251').decode(),
+            Tag.objects.create(
+                name=elem['name'],
                 color=elem['color'],
                 slug=elem['slug'],
             )

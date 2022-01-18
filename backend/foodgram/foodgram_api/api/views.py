@@ -2,46 +2,56 @@ from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from rest_framework import viewsets, generics, status
-from rest_framework.decorators import action, permission_classes, api_view
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import MethodNotAllowed, ValidationError
-from rest_framework.response import Response
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from recipes.models import (
-    Ingredients,
-    Tags,
-    Recipes,
-    Cart,
-    Favorite,
-    RecipesIngredients
-)
-from users.models import Subscriptions, User
 
 from .filters import IngredientsFilter, RecipeFilter
 from .pagination import PageLimitPagination
 from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
-from .serializers import (
-    TagsSerializer,
-    IngredientsSerializer,
-    RecipesSerializerRead,
-    RecipesSerializer,
-    SubscriptionsSerializer,
-    SubscribeSerializer,
-    CartSerializer,
-    FavoriteSerializer
-)
+from .serializers import (CartSerializer, FavoriteSerializer,
+                          IngredientsSerializer, RecipesSerializer,
+                          RecipesSerializerRead, SubscribeSerializer,
+                          SubscriptionsSerializer, TagsSerializer)
+from recipes.models import (Cart, Favorite, Ingredient, Recipe,
+                            RecipesIngredients, Tag)
+from users.models import Subscriptions, User
+
+
+class CartFavoriteBaseViewSet(viewsets.ModelViewSet):
+    """
+    Базовый вьюсет для корзины покупок и для избранного.
+    """
+    queryset = None
+    serializer_class = None
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        recipe_id = self.kwargs.get('recipe_id')
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        serializer.save(recipe=recipe, user=user)
+
+    def delete(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        recipe_id = self.kwargs.get('recipe_id')
+        object = get_object_or_404(
+            queryset,
+            recipe=recipe_id,
+            user=self.request.user
+        )
+        self.perform_destroy(object)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FoodgramUserViewSet(UserViewSet):
     """
     Обработка пользователей.
     """
-
-    def perform_update(self, serializer):
-        pass
 
     @action(["get", "delete"], detail=False,
             permission_classes=[CurrentUserOrAdmin], name='me')
@@ -58,7 +68,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     Обработка тэгов.
     """
     serializer_class = TagsSerializer
-    queryset = Tags.objects.all()
+    queryset = Tag.objects.all()
     permission_classes = [IsAdminOrReadOnly]
 
 
@@ -67,7 +77,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     Обработка ингредиентов.
     """
     serializer_class = IngredientsSerializer
-    queryset = Ingredients.objects.all()
+    queryset = Ingredient.objects.all()
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = IngredientsFilter
@@ -78,7 +88,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     Обработка рецептов.
     """
     serializer_class = RecipesSerializerRead
-    queryset = Recipes.objects.all()
+    queryset = Recipe.objects.all()
     permission_classes = [IsAuthorOrAdminOrReadOnly]
     pagination_class = PageLimitPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -124,14 +134,7 @@ class SubscribeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         author_id = self.kwargs.get('author_id')
         author = get_object_or_404(User, id=author_id)
-        if user == author:
-            raise ValidationError(detail='Subscribe to yourself not allowed')
-        if Subscriptions.objects.filter(author=author, user=user).exists():
-            raise ValidationError(
-                detail='You have already subscribed to the author'
-            )
-        else:
-            serializer.save(author=author, user=user)
+        serializer.save(author=author, user=user)
 
     def delete(self, request, *args, **kwargs):
         author_id = self.kwargs.get('author_id')
@@ -144,7 +147,7 @@ class SubscribeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CartViewSet(viewsets.ModelViewSet):
+class CartViewSet(CartFavoriteBaseViewSet):
     """
     Обработка корзины покупок.
     """
@@ -152,53 +155,14 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        recipe_id = self.kwargs.get('recipe_id')
-        recipe = get_object_or_404(Recipes, id=recipe_id)
-        if Cart.objects.filter(recipe=recipe, user=user).exists():
-            raise ValidationError(detail='The recipe is already in the cart')
-        else:
-            serializer.save(recipe=recipe, user=user)
 
-    def delete(self, request, *args, **kwargs):
-        recipe_id = self.kwargs.get('recipe_id')
-        cart_object = get_object_or_404(
-            Cart,
-            recipe=recipe_id,
-            user=self.request.user
-        )
-        self.perform_destroy(cart_object)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class FavoriteViewSet(viewsets.ModelViewSet):
+class FavoriteViewSet(CartFavoriteBaseViewSet):
     """
-    Обаботка списка избанных рецептов.
+    Обработка списка избанных рецептов.
     """
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
     permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        recipe_id = self.kwargs.get('recipe_id')
-        recipe = get_object_or_404(Recipes, id=recipe_id)
-        if Favorite.objects.filter(recipe=recipe, user=user).exists():
-            raise ValidationError(
-                detail='The recipe is already in the favorite list'
-            )
-        else:
-            serializer.save(recipe=recipe, user=user)
-
-    def delete(self, request, *args, **kwargs):
-        recipe_id = self.kwargs.get('recipe_id')
-        favorite_object = get_object_or_404(
-            Favorite,
-            recipe=recipe_id, user=self.request.user
-        )
-        self.perform_destroy(favorite_object)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET'])

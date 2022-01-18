@@ -1,12 +1,20 @@
 version: '3.3'
 services:
 
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/posgresql/data/
+    env_file:
+      - ./.env
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - web
   web:
     build:
       context: ../backend
@@ -17,6 +25,10 @@ services:
       - media_value:/foodgram/foodgram_api/media/
     ports:
       - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
   nginx:
     image: nginx:1.19.3
     ports:
