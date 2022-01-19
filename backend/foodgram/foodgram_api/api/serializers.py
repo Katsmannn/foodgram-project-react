@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 
@@ -139,7 +138,7 @@ class RecipesSerializerRead(serializers.ModelSerializer):
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    image = Base64ImageField()
+#    image = Base64ImageField()
     text = serializers.CharField(
         source='description'
     )
@@ -284,6 +283,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField()
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
 
     class Meta:
         model = Subscription
@@ -291,6 +291,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
             'id',
             'username',
             'first_name',
+            'last_name',
             'is_subscribed',
             'recipes',
             'recipes_count',
