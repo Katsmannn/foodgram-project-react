@@ -2,14 +2,14 @@ from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
-from djoser.permissions import CurrentUserOrAdmin
-from djoser.views import UserViewSet
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from djoser.permissions import CurrentUserOrAdmin
+from djoser.views import UserViewSet
 
 from .filters import IngredientsFilter, RecipeFilter
 from .pagination import PageLimitPagination
@@ -19,8 +19,8 @@ from .serializers import (CartSerializer, FavoriteSerializer,
                           RecipesSerializerRead, SubscribeSerializer,
                           SubscriptionsSerializer, TagsSerializer)
 from recipes.models import (Cart, Favorite, Ingredient, Recipe,
-                            RecipesIngredients, Tag)
-from users.models import Subscriptions, User
+                            RecipesIngredient, Tag)
+from users.models import Subscription, User
 
 
 class CartFavoriteBaseViewSet(viewsets.ModelViewSet):
@@ -119,14 +119,14 @@ class SubscriptionsListViewSet(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Subscriptions.objects.filter(user=user)
+        return Subscription.objects.filter(user=user)
 
 
 class SubscribeViewSet(viewsets.ModelViewSet):
     """
     Обработка подписок пользователя (создание/удаление).
     """
-    queryset = Subscriptions.objects.all()
+    queryset = Subscription.objects.all()
     serializer_class = SubscribeSerializer
     permission_classes = [IsAuthenticated]
 
@@ -139,7 +139,7 @@ class SubscribeViewSet(viewsets.ModelViewSet):
     def delete(self, request, *args, **kwargs):
         author_id = self.kwargs.get('author_id')
         subscribe_object = get_object_or_404(
-            Subscriptions,
+            Subscription,
             author=author_id,
             user=self.request.user
         )
@@ -173,7 +173,7 @@ def download_shopping_cart(request):
     и отпавка в виде текстового файла.
     """
     user = request.user
-    ingredients = RecipesIngredients.objects.filter(
+    ingredients = RecipesIngredient.objects.filter(
         recipe__cart_recipe__user=user.id
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'

@@ -1,13 +1,13 @@
-from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 
 from .utils import add_ingredients_tags, get_user_and_recipe_from_serializer
 from recipes.models import (Cart, Favorite, Ingredient, Recipe,
-                            RecipesIngredients, Tag)
-from users.models import Subscriptions, User
+                            RecipesIngredient, Tag)
+from users.models import Subscription, User
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -63,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         return (
             user.is_authenticated
-            and Subscriptions.objects.filter(
+            and Subscription.objects.filter(
                 author=obj, user=user
             ).exists()
         )
@@ -92,7 +92,7 @@ class RecipesIngredientsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = RecipesIngredients
+        model = RecipesIngredient
         fields = [
             'id',
             'amount',
@@ -114,7 +114,7 @@ class RecipeIngredientsSerializerRead(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = RecipesIngredients
+        model = RecipesIngredient
         fields = [
             'id',
             'name',
@@ -134,7 +134,7 @@ class RecipesSerializerRead(serializers.ModelSerializer):
         many=True
     )
     ingredients = RecipeIngredientsSerializerRead(
-        source='recipesingredients_set',
+        source='recipesingredient_set',
         many=True
     )
     is_favorited = serializers.SerializerMethodField()
@@ -221,16 +221,16 @@ class RecipesSerializer(serializers.ModelSerializer):
         return add_ingredients_tags(
             recipe,
             validated_data,
-            RecipesIngredients
+            RecipesIngredient
         )[0]
 
     def update(self, instance, validated_data):
         instance.tags.clear()
-        RecipesIngredients.objects.filter(recipe=instance.id).delete()
+        RecipesIngredient.objects.filter(recipe=instance.id).delete()
         instance, validated_data = add_ingredients_tags(
             instance,
             validated_data,
-            RecipesIngredients
+            RecipesIngredient
         )
         super().update(instance, validated_data)
         return instance
@@ -286,7 +286,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='author.first_name')
 
     class Meta:
-        model = Subscriptions
+        model = Subscription
         fields = [
             'id',
             'username',
@@ -332,7 +332,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
-        model = Subscriptions
+        model = Subscription
         fields = ['username']
         read_only_fields = ['author', 'user']
 
@@ -351,7 +351,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 detail='Subscribe to yourself not allowed'
             )
-        if Subscriptions.objects.filter(
+        if Subscription.objects.filter(
             author=author_id,
             user=user_id
         ).exists():

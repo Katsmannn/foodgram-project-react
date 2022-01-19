@@ -26,7 +26,11 @@ urlpatterns = [
         download_shopping_cart,
         name='download'
     ),
-    path('users/subscriptions/', SubscriptionsListViewSet.as_view()),
+    path(
+        'users/subscriptions/',
+        SubscriptionsListViewSet.as_view(),
+        name='subscriptions'
+    ),
     path('', include(api_router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
 ]

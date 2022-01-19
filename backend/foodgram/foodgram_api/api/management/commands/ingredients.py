@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-
 import json
 
 from recipes.models import Ingredient
@@ -23,3 +22,4 @@ class Command(BaseCommand):
                 ]
             )
         file.close()
+

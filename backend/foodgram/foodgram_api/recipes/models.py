@@ -31,7 +31,7 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         verbose_name='name',
-        max_length=50
+        max_length=150
     )
     measurement_unit = models.CharField(
         verbose_name='measurement_unit',
@@ -69,7 +69,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         verbose_name='recipe_ingredient',
         to=Ingredient,
-        through='RecipesIngredients'
+        through='RecipesIngredient'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -93,7 +93,7 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipesIngredients(models.Model):
+class RecipesIngredient(models.Model):
 
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE,

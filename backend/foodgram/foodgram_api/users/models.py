@@ -26,7 +26,7 @@ class User(AbstractUser):
         ordering = ['username']
 
 
-class Subscriptions(models.Model):
+class Subscription(models.Model):
 
     author = models.ForeignKey(
         User,
