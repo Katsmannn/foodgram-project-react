@@ -27,13 +27,6 @@ jobs:
           file: backend/Dockerfile
           tags: katsmannn/foodgram:v1
 
-      - name: Push to Docker Hub Backend Front
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: frontend/Dockerfile
-          tags: katsmannn/foodgram_front:v1
-
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
