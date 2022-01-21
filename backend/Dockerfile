@@ -6,7 +6,7 @@ COPY /foodgram/requirements.txt .
 
 RUN pip3 install -r ./requirements.txt --no-cache-dir
 
-COPY foodgram/ .
+COPY . .
 
 WORKDIR foodgram_api/
 
