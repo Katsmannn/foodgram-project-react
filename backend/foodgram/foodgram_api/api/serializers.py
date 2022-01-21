@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 
+from .fields import ImageFieldForRecipeRead
 from .utils import add_ingredients_tags, get_user_and_recipe_from_serializer
 from recipes.models import (Cart, Favorite, Ingredient, Recipe,
                             RecipesIngredient, Tag)
@@ -138,7 +139,7 @@ class RecipesSerializerRead(serializers.ModelSerializer):
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-#    image = Base64ImageField()
+    image = ImageFieldForRecipeRead()
     text = serializers.CharField(
         source='description'
     )

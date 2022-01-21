@@ -21,8 +21,8 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - ./static_api/:/foodgram/static_api/
-      - ./media/:/foodgram/media/
+      - ./static_api/:/foodgram/foodgram_api/static_api/
+      - ./media/:/foodgram/foodgram_api/media/
     ports:
       - "8000:8000"
     env_file:
