@@ -10,7 +10,7 @@ class RecipeFilter(filt.FilterSet):
     author = filt.NumberFilter(
         field_name='author',
     )
-    tags = filt.CharFilter(
+    tags = filt.AllValuesMultipleFilter(
         field_name='tags__slug',
         lookup_expr='istartswith',
     )
