@@ -18,27 +18,27 @@ http://konenkovsa.tk/
 ## Развёртывание проекта
 > Склонировать проект из репозитория  
 > Запустить сборку контейнеров проекта  
-'''
+```
 sudo docker-compose up --build -d
-'''  
+```
 > Выполнить миграции  
-'''
+```
 sudo docker-compose exec web pyhton manage.py makemigrations
 sudo docker-compose exec web pyhton manage.py migrate
-'''  
+```
 > Наполнить базу данными tags, ingredients  
-'''
+```
 sudo docker-compose exec web pyhton manage.py tags
 sudo docker-compose exec web pyhton manage.py ingredients
-'''  
+```
 > Создать суперюзера  
-'''
+```
 sudo docker-compose exec web pyhton manage.py createsuperuser
-'''  
+```
 > Собрать статику проекта  
-'''
+```
 sudo docker-compose exec web pyhton manage.py collectstatic
-'''  
+```
 
 ![Status](https://github.com/katsmannn/foodgram-project-react/actions/workflows/foodgram.yml/badge.svg)  
   
