@@ -250,6 +250,11 @@ class RecipesSerializer(serializers.ModelSerializer):
         return value
 
     def validate_ingredients(self, value):
+        ingredients = [ingredient['id'] for ingredient in value]
+        if len(ingredients) != len(set(ingredients)):
+            raise serializers.ValidationError(
+                    'ingredient in recipe must be unique'
+                )
         for ingredient in value:
             amount = ingredient['amount']
             if amount <= 0:
